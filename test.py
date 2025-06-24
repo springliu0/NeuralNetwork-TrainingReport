@@ -27,13 +27,30 @@ def test(dataloader, model, device):
     correct_num = 0                 # 预测正确的样本数
 
     # START----------------------------------------------------------
+    with torch.no_grad():  # 测试不需要计算梯度
+        for sample in dataloader:
+            imgs = sample['image']
+            labels = sample['label']
+            imgs, labels = imgs.to(device), labels.to(device)
 
+
+            # 前向传播
+            outputs = model(imgs)
+
+            # 取每个样本的预测结果
+            preds = outputs.argmax(1)
+
+            # 累加预测正确数量
+            correct_num += (preds == labels).sum().item()
+
+    accuracy = 100. * correct_num / size
+    print(f"Accuracy: {accuracy:.2f}%")
     # END------------------------------------------------------------
 
 
 if __name__ == "__main__":
     # 加载训练好的模型
-    model = torch.load('./models/model.pkl')
+    model = torch.load('./models/model.pkl', weights_only=False)
     if torch.cuda.is_available():
         device = torch.device("cuda")
     else:

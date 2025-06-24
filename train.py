@@ -29,7 +29,26 @@ def train_loop(epoch, dataloader, model, loss_fn, optimizer, device):
     model.train()
 
     # START----------------------------------------------------------
+    for ep in range(epoch):  # 外层循环：训练多轮
+        total_loss = 0
+        for batch in train_dataloader:
+            imgs = batch['image'].to(device)
+            labels = batch['label'].to(device)
 
+            # 前向传播
+            outputs = model(imgs)
+
+            # 计算损失
+            loss = loss_fn(outputs, labels)
+
+            # 反向传播和优化
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss.item()
+
+        print(f"Epoch [{ep + 1}/{epoch}], Loss: {total_loss:.4f}")
     # END------------------------------------------------------------
 
     # 保存模型

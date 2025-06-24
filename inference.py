@@ -23,7 +23,17 @@ def inference(image_path, model, device):
     model.eval()
 
     # START----------------------------------------------------------
+    image = Image.open(image_path).convert("RGB")
+    transform = ToTensor()
+    image = transform(image).unsqueeze(0).to(device)  # [1, 3, 64, 64]
 
+    # 2. 禁用梯度计算进行推理
+    with torch.no_grad():
+        output = model(image)
+        pred = output.argmax(1).item()
+
+    print(f"图片路径: {image_path}")
+    print(f"预测结果: {pred}")
     # END------------------------------------------------------------
 
 
@@ -32,7 +42,7 @@ if __name__ == "__main__":
     image_path = "./images/test/signs/img_0006.png"
 
     # 加载训练好的模型
-    model = torch.load('./models/model.pkl')
+    model = torch.load('./models/model.pkl',weights_only=False)
     if torch.cuda.is_available():
         device = torch.device("cuda")
     else:

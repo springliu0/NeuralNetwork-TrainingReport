@@ -10,7 +10,7 @@
 
 import torch
 from torch import nn
-
+import torch.nn.functional as F
 
 class CustomNet(nn.Module):
     """自定义神经网络模型。
@@ -24,8 +24,15 @@ class CustomNet(nn.Module):
         """
         super(CustomNet, self).__init__()
 
-        # START----------------------------------------------------------
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
+        self.pool1 = nn.MaxPool2d(2, 2)
 
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
+        self.pool2 = nn.MaxPool2d(2, 2)
+
+        self.fc1 = nn.Linear(64 * 16 * 16, 128)
+
+        self.fc2 = nn.Linear(128, 6)
         # END------------------------------------------------------------
 
     def forward(self, x):
@@ -33,7 +40,12 @@ class CustomNet(nn.Module):
         在本方法中，请完成对神经网络前向传播计算的定义。
         """
         # START----------------------------------------------------------
-
+        x = self.pool1(F.relu(self.conv1(x)))  # [B, 32, 32, 32]
+        x = self.pool2(F.relu(self.conv2(x)))  # [B, 64, 16, 16]
+        x = x.view(-1, 64 * 16 * 16)
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
         # END------------------------------------------------------------
 
 
